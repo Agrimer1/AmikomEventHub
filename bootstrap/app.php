@@ -29,9 +29,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->create();
 
-// Set storage path to /tmp/storage when running on Vercel
+// Set storage and bootstrap cache paths to /tmp when running on Vercel (read-only filesystem)
 if (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || getenv('VERCEL')) {
     $app->useStoragePath('/tmp/storage');
+    $app->useBootstrapPath('/tmp/bootstrap');
 }
 
 return $app;

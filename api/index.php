@@ -5,16 +5,17 @@ putenv('VERCEL=1');
 $_ENV['VERCEL'] = '1';
 $_SERVER['VERCEL'] = '1';
 
-// Prepare writable storage folders in Vercel's ephemeral /tmp directory
-$storageDirs = [
+// Prepare writable storage & bootstrap cache folders in Vercel's ephemeral /tmp directory
+$dirs = [
     '/tmp/storage/app/public',
     '/tmp/storage/framework/cache/data',
     '/tmp/storage/framework/sessions',
     '/tmp/storage/framework/views',
     '/tmp/storage/logs',
+    '/tmp/bootstrap/cache',
 ];
 
-foreach ($storageDirs as $dir) {
+foreach ($dirs as $dir) {
     if (!is_dir($dir)) {
         mkdir($dir, 0755, true);
     }
