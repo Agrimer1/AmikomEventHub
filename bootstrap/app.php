@@ -29,8 +29,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->create();
 
-// Set storage path to /tmp/storage when running on Vercel (read-only filesystem)
-if (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL'])) {
+// Set storage path to /tmp/storage when running on Vercel
+if (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || getenv('VERCEL')) {
     $app->useStoragePath('/tmp/storage');
 }
 

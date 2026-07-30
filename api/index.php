@@ -1,5 +1,10 @@
 <?php
 
+// Set Vercel environment flags
+putenv('VERCEL=1');
+$_ENV['VERCEL'] = '1';
+$_SERVER['VERCEL'] = '1';
+
 // Prepare writable storage folders in Vercel's ephemeral /tmp directory
 $storageDirs = [
     '/tmp/storage/app/public',
