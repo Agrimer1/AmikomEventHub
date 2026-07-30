@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Transaction;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -41,11 +42,16 @@ class DashboardController extends Controller
         $totalReviews = (clone $reviewQuery)->count();
         $avgRating = $totalReviews > 0 ? (float) round((clone $reviewQuery)->avg('rating'), 1) : 0;
 
+        // Ekspresi ekstraksi bulan yang kompatibel dengan MySQL & PostgreSQL
+        $monthExpr = DB::getDriverName() === 'pgsql' 
+            ? 'EXTRACT(MONTH FROM created_at)::integer as month' 
+            : 'MONTH(created_at) as month';
+
         // 2. Data Realtime Grafik Pendapatan Bulanan (Tahun Berjalan)
         $revenuePerMonthRaw = Transaction::forUser($user)
             ->whereIn('status', ['settlement', 'success'])
             ->whereYear('created_at', $currentYear)
-            ->selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+            ->selectRaw("{$monthExpr}, SUM(total_price) as total")
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();
@@ -53,7 +59,7 @@ class DashboardController extends Controller
         // 3. Data Realtime Grafik Jumlah Transaksi Bulanan (Tahun Berjalan)
         $transactionsPerMonthRaw = Transaction::forUser($user)
             ->whereYear('created_at', $currentYear)
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->selectRaw("{$monthExpr}, COUNT(*) as count")
             ->groupBy('month')
             ->pluck('count', 'month')
             ->toArray();
