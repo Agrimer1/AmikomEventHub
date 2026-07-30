@@ -12,6 +12,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'organizer' => \App\Http\Middleware\OrganizerMiddleware::class,
