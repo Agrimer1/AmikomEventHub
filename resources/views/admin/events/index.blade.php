@@ -36,12 +36,15 @@
                         {{ $events->firstItem() + $index }}
                     </td>
 
-                    <!-- Poster -->
+                    <!-- Poster Thumbnail -->
                     <td class="px-8 py-6">
-                        <img src="{{ $event->poster_url }}"
-                             class="w-16 h-20 rounded-xl object-cover shadow-sm" alt="{{ $event->title }}">
+                        <img src="{{ ($event->poster_path && Storage::disk('public')->exists($event->poster_path))
+                                        ? asset('storage/' . $event->poster_path)
+                                        : 'https://placehold.co/160x200?text=No+Image' }}"
+                            alt="{{ $event->title }}"
+                            class="w-16 h-20 rounded-xl object-cover shadow-sm">
                     </td>
-
+                    
                     <!-- Event -->
                     <td class="px-8 py-6">
                         <p class="font-black text-slate-800">

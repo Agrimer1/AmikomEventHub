@@ -11,8 +11,20 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'organizer' => \App\Http\Middleware\OrganizerMiddleware::class,
+        ]);
+
+        $middleware->validateCsrfTokens(except: [
+            '/midtrans/callback',
+            '/logout',
+            '/admin/logout',
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->create();

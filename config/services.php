@@ -35,4 +35,21 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', 'http://localhost:8000/auth/google/callback'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fonnte WhatsApp Notification API
+    |--------------------------------------------------------------------------
+    | Digunakan untuk notifikasi pembayaran berhasil dan Abandoned Cart Recovery.
+    | Isi FONNTE_TOKEN pada file .env Anda.
+    */
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+    ],
+
 ];

@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Event;
+use App\Models\Organizer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
@@ -13,9 +17,8 @@ class EventController extends Controller
      */
     public function index()
     {
-    // Memakai relasi dan pengaturan limit paginasi (10 entri per halaman)
-    $events = \App\Models\Event::with('category')->latest()->paginate(10);
-    return view('admin.events.index', compact('events'));
+        $events = Event::forUser()->with(['category', 'organizer'])->latest()->paginate(10);
+        return view('admin.events.index', compact('events'));
     }
 
     /**
@@ -23,8 +26,10 @@ class EventController extends Controller
      */
     public function create()
     {
-        $categories = \App\Models\Category::all();
-        return view('admin.events.create', compact('categories'));
+        $categories = Category::all();
+        $organizers = auth()->user()->isSuperAdmin() ? Organizer::all() : collect();
+
+        return view('admin.events.create', compact('categories', 'organizers'));
     }
 
     /**
@@ -32,16 +37,23 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
+
         $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title'       => 'required|string|max:255',
-            'description' => 'required|string',
-            'date'        => 'required|date',
-            'location'    => 'required|string|max:255',
-            'price'       => 'required|numeric',
-            'stock'       => 'required|numeric',
-            'poster'      => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'category_id'  => 'required|exists:categories,id',
+            'organizer_id' => $user->isSuperAdmin() ? 'nullable|exists:organizers,id' : 'nullable',
+            'title'        => 'required|string|max:255',
+            'description'  => 'required|string',
+            'date'         => 'required|date',
+            'location'     => 'required|string|max:255',
+            'price'        => 'required|numeric|min:0',
+            'stock'        => 'required|numeric|min:1',
+            'poster'       => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
+
+        if ($user->isOrganizer()) {
+            $data['organizer_id'] = $user->organizer?->id;
+        }
 
         if ($request->hasFile('poster')) {
             $data['poster_path'] = $request->file('poster')->store('posters', 'public');
@@ -59,8 +71,17 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
-        $categories = \App\Models\Category::all();
-        return view('admin.events.edit', compact('event', 'categories'));
+        $user = auth()->user();
+
+        // Pengecekan otorisasi policy
+        if ($user->isOrganizer() && $event->organizer_id !== $user->organizer?->id) {
+            abort(403, 'Anda tidak memiliki hak untuk mengedit event milik organizer lain.');
+        }
+
+        $categories = Category::all();
+        $organizers = $user->isSuperAdmin() ? Organizer::all() : collect();
+
+        return view('admin.events.edit', compact('event', 'categories', 'organizers'));
     }
 
     /**
@@ -68,37 +89,58 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
-        $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title'       => 'required|string|max:255',
-            'description' => 'required|string',
-            'date'        => 'required|date',
-            'location'    => 'required|string|max:255',
-            'price'       => 'required|numeric',
-            'stock'       => 'required|numeric',
-            'poster'      => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
-        ]);
+        $user = auth()->user();
 
-        if ($request->hasFile('poster')) {
-            $data['poster_path'] = $request->file('poster')->store('posters', 'public');
+        if ($user->isOrganizer() && $event->organizer_id !== $user->organizer?->id) {
+            abort(403, 'Anda tidak memiliki hak untuk memperbarui event ini.');
         }
 
-        $event->update($data);
+        $data = $request->validate([
+            'category_id'  => 'required|exists:categories,id',
+            'organizer_id' => $user->isSuperAdmin() ? 'nullable|exists:organizers,id' : 'nullable',
+            'title'        => 'required|string|max:255',
+            'description'  => 'required|string',
+            'date'         => 'required|date',
+            'location'     => 'required|string|max:255',
+            'price'        => 'required|numeric|min:0',
+            'stock'        => 'required|numeric|min:1',
+            'poster'       => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ]);
 
-        return redirect()
-            ->route('admin.events.index')
-            ->with('success', 'Event berhasil diperbarui!');
-    }
+        if ($user->isOrganizer()) {
+            $data['organizer_id'] = $user->organizer?->id;
+        }
+
+        if ($request->hasFile('poster')) {
+            if ($event->poster_path && Storage::disk('public')->exists($event->poster_path)) {
+                Storage::disk('public')->delete($event->poster_path);
+            }
+            $data['poster_path'] = $request->file('poster')->store('posters', 'public');
+        }
+    
+        $event->update($data);
+        return redirect()->route('admin.events.index')->with('success', 'Event berhasil diperbarui.');
+    }    
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Event $event)
     {
+        $user = auth()->user();
+
+        if ($user->isOrganizer() && $event->organizer_id !== $user->organizer?->id) {
+            abort(403, 'Anda tidak memiliki hak untuk menghapus event ini.');
+        }
+
+        if ($event->poster_path && Storage::disk('public')->exists($event->poster_path)) {
+            Storage::disk('public')->delete($event->poster_path);
+        }
+
         $event->delete();
 
         return redirect()
             ->route('admin.events.index')
-            ->with('success', 'Event berhasil dihapus!');
+            ->with('success', 'Event berhasil dihapus.');
     }
 }
