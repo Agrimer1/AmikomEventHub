@@ -16,7 +16,7 @@ class SocialiteController extends Controller
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     /**
@@ -25,7 +25,7 @@ class SocialiteController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
             // Cari user berdasarkan email atau google_id
             $user = User::where('email', $googleUser->getEmail())
