@@ -31,8 +31,8 @@
                 @forelse($organizers as $org)
                 <tr class="hover:bg-slate-50 transition">
                     <td class="p-4 flex items-center gap-3">
-                        @if($org->logo_path)
-                            <img src="{{ asset('storage/' . $org->logo_path) }}" alt="{{ $org->name }}" class="w-10 h-10 rounded-xl object-cover border border-slate-200">
+                        @if($org->logo_url)
+                            <img src="{{ $org->logo_url }}" alt="{{ $org->name }}" class="w-10 h-10 rounded-xl object-cover border border-slate-200">
                         @else
                             <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center font-black">
                                 {{ strtoupper(substr($org->name, 0, 2)) }}
@@ -58,13 +58,18 @@
                         {{ $org->created_at->format('d M Y H:i') }}
                     </td>
                     <td class="p-4 text-center">
-                        <form action="{{ route('admin.organizers.destroy', $org->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Organizer ini beserta akun loginnya?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition font-bold text-xs">
-                                Hapus
-                            </button>
-                        </form>
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ route('admin.organizers.edit', $org->id) }}" class="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition font-bold text-xs">
+                                Edit
+                            </a>
+                            <form action="{{ route('admin.organizers.destroy', $org->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Organizer ini beserta akun loginnya?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition font-bold text-xs">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @empty

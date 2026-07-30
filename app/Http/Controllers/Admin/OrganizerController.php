@@ -75,6 +75,50 @@ class OrganizerController extends Controller
     }
 
     /**
+     * Show form to edit existing organizer.
+     */
+    public function edit(Organizer $organizer): View
+    {
+        return view('admin.organizers.edit', compact('organizer'));
+    }
+
+    /**
+     * Update existing organizer.
+     */
+    public function update(Request $request, Organizer $organizer): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $logoPath = $organizer->logo_path;
+        if ($request->hasFile('logo')) {
+            $logoPath = $this->cloudinary->upload($request->file('logo'), 'organizers');
+        }
+
+        $organizer->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'logo_path' => $logoPath,
+        ]);
+
+        if ($organizer->user) {
+            $organizer->user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.organizers.index')
+            ->with('success', 'Organizer berhasil diperbarui!');
+    }
+
+    /**
      * Remove organizer and associated user.
      */
     public function destroy(Organizer $organizer): RedirectResponse

@@ -23,6 +23,14 @@ class Partner extends Model
             return asset('storage/' . $this->logo_url);
         }
 
+        if (file_exists(public_path('assets/' . $this->logo_url))) {
+            return asset('assets/' . $this->logo_url);
+        }
+
+        if (file_exists(public_path($this->logo_url))) {
+            return asset($this->logo_url);
+        }
+
         return asset('storage/' . $this->logo_url);
     }
 }

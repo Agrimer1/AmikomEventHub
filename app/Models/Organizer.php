@@ -44,6 +44,14 @@ class Organizer extends Model
             return asset('storage/' . $this->logo_path);
         }
 
+        if (file_exists(public_path('assets/' . $this->logo_path))) {
+            return asset('assets/' . $this->logo_path);
+        }
+
+        if (file_exists(public_path($this->logo_path))) {
+            return asset($this->logo_path);
+        }
+
         return asset('storage/' . $this->logo_path);
     }
 }
