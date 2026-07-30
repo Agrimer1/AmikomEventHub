@@ -35,8 +35,8 @@ use App\Http\Controllers\Admin\OrganizerController;
 // Route login umum (menampilkan halaman login dengan Socialite Google)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 
-// Route logout umum
-Route::post('/logout', function (\Illuminate\Http\Request $request) {
+// Route logout umum (Mendukung GET dan POST agar tidak error 405 Method Not Allowed)
+Route::match(['get', 'post'], '/logout', function (\Illuminate\Http\Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
@@ -77,7 +77,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // AUTHENTICATION
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
     // PROTECTED ROUTES: Bisa diakses oleh Super Admin dan Organizer
     Route::middleware(['auth', 'organizer'])->group(function () {
