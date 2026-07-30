@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\OrganizerController;
 
 // Route login umum (menampilkan halaman login dengan Socialite Google)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 
 // Route logout umum (Mendukung GET dan POST agar tidak error 405 Method Not Allowed)
 Route::match(['get', 'post'], '/logout', function (\Illuminate\Http\Request $request) {

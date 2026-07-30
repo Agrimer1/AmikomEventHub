@@ -22,12 +22,18 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('admin.dashboard'); // Arahkan ke rute dashboard
+            $user = Auth::user();
+
+            if ($user->isSuperAdmin() || $user->isOrganizer()) {
+                return redirect()->intended(route('admin.dashboard'))->with('success', 'Berhasil masuk ke Admin Panel.');
+            }
+
+            return redirect()->intended(route('home'))->with('success', 'Berhasil masuk ke akun Anda.');
         }
 
         return back()->withErrors([
             'email' => 'Email atau Password yang Anda berikan tidak terdaftar di database kami.',
-        ]);
+        ])->onlyInput('email');
     }
 
     // 3. Fungsi memroses Log Out (Keluar)
