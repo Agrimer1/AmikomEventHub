@@ -7,8 +7,8 @@
     <!-- Header Profil Organizer -->
     <div class="bg-white rounded-3xl p-8 md:p-12 border border-slate-100 shadow-sm mb-12 flex flex-col md:flex-row items-center gap-8">
         <div class="relative">
-            @if($organizer->logo_path)
-                <img src="{{ asset('storage/' . $organizer->logo_path) }}" alt="{{ $organizer->name }}" class="w-32 h-32 rounded-3xl object-cover border-4 border-indigo-50 shadow-md">
+            @if($organizer->logo_url)
+                <img src="{{ $organizer->logo_url }}" alt="{{ $organizer->name }}" class="w-32 h-32 rounded-3xl object-cover border-4 border-indigo-50 shadow-md">
             @else
                 <div class="w-32 h-32 bg-indigo-600 text-white rounded-3xl flex items-center justify-center font-black text-4xl shadow-md shadow-indigo-100">
                     {{ strtoupper(substr($organizer->name, 0, 2)) }}
@@ -71,9 +71,7 @@
                 <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-xl transition-shadow flex flex-col justify-between">
                     <div>
                         <div class="relative h-48 overflow-hidden">
-                            <img src="{{ ($event->poster_path && Storage::disk('public')->exists($event->poster_path))
-                                ? asset('storage/' . $event->poster_path)
-                                : 'https://placehold.co/600x400' }}"
+                            <img src="{{ $event->poster_url }}"
                                 alt="{{ $event->title }}" class="w-full h-full object-cover">
                             <span class="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-md text-indigo-700 text-xs font-extrabold rounded-xl">
                                 {{ $event->category->name ?? 'Event' }}

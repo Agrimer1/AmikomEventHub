@@ -52,4 +52,15 @@ return [
         'token' => env('FONNTE_TOKEN'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudinary Image Upload Service
+    |--------------------------------------------------------------------------
+    */
+    'cloudinary' => [
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME', 's2jmy0a6'),
+        'api_key'    => env('CLOUDINARY_API_KEY', '618873684742824'),
+        'api_secret' => env('CLOUDINARY_API_SECRET', 'KHYwshqvO5jgRjPHTr4ZAqQ3Rzg'),
+    ],
+
 ];

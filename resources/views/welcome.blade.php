@@ -84,11 +84,9 @@
                 <div
                     class="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden">
                     <div class="relative overflow-hidden aspect-[3/4]">
-                    <img src="{{ ($event->poster_path && Storage::disk('public')->exists($event->poster_path))
-                            ? asset('storage/' . $event->poster_path)
-                            : 'https://placehold.co/200x600' }}"
-                        alt="{{ $event->title }}"
-                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="{{ $event->poster_url }}"
+                            alt="{{ $event->title }}"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div
                             class="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur rounded-lg text-xs font-bold uppercase text-indigo-600">
                             {{ $event->category->name ?? 'Event' }}</div>
@@ -129,8 +127,8 @@
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-items-center">
                 @forelse($partners as $partner)
                     <div class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition w-full h-32">
-                        @if($partner->logo_url)
-                            <img src="{{ asset('storage/' . $partner->logo_url) }}" alt="{{ $partner->name }}" class="max-h-16 max-w-[80%] object-contain mb-2">
+                        @if($partner->logo_full_url)
+                            <img src="{{ $partner->logo_full_url }}" alt="{{ $partner->name }}" class="max-h-16 max-w-[80%] object-contain mb-2">
                         @else
                             <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-2">
                                 <span class="text-slate-400 font-bold text-lg">{{ substr($partner->name, 0, 1) }}</span>

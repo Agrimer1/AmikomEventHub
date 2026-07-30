@@ -4,11 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PartnerController extends Controller
 {
+    public function __construct(protected CloudinaryService $cloudinary)
+    {
+        //
+    }
+
     public function index(Request $request)
     {
         $query = Partner::query();
@@ -35,7 +41,7 @@ class PartnerController extends Controller
 
         $logoPath = null;
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('partners', 'public');
+            $logoPath = $this->cloudinary->upload($request->file('logo'), 'partners');
         }
 
         Partner::create([
@@ -60,11 +66,10 @@ class PartnerController extends Controller
 
         $logoPath = $partner->logo_url;
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($partner->logo_url && Storage::disk('public')->exists($partner->logo_url)) {
+            if ($partner->logo_url && !str_starts_with($partner->logo_url, 'http') && Storage::disk('public')->exists($partner->logo_url)) {
                 Storage::disk('public')->delete($partner->logo_url);
             }
-            $logoPath = $request->file('logo')->store('partners', 'public');
+            $logoPath = $this->cloudinary->upload($request->file('logo'), 'partners');
         }
 
         $partner->update([
@@ -77,7 +82,7 @@ class PartnerController extends Controller
 
     public function destroy(Partner $partner)
     {
-        if ($partner->logo_url && Storage::disk('public')->exists($partner->logo_url)) {
+        if ($partner->logo_url && !str_starts_with($partner->logo_url, 'http') && Storage::disk('public')->exists($partner->logo_url)) {
             Storage::disk('public')->delete($partner->logo_url);
         }
 

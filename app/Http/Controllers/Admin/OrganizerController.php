@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreOrganizerRequest;
 use App\Models\Organizer;
 use App\Models\User;
+use App\Services\CloudinaryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +16,11 @@ use Illuminate\View\View;
 
 class OrganizerController extends Controller
 {
+    public function __construct(protected CloudinaryService $cloudinary)
+    {
+        //
+    }
+
     /**
      * Display a listing of organizers (Super Admin Only).
      */
@@ -50,7 +56,7 @@ class OrganizerController extends Controller
         // 2. Upload Logo jika ada
         $logoPath = null;
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('organizers/logos', 'public');
+            $logoPath = $this->cloudinary->upload($request->file('logo'), 'organizers');
         }
 
         // 3. Buat Entitas Organizer
@@ -73,7 +79,7 @@ class OrganizerController extends Controller
      */
     public function destroy(Organizer $organizer): RedirectResponse
     {
-        if ($organizer->logo_path && Storage::disk('public')->exists($organizer->logo_path)) {
+        if ($organizer->logo_path && !str_starts_with($organizer->logo_path, 'http') && Storage::disk('public')->exists($organizer->logo_path)) {
             Storage::disk('public')->delete($organizer->logo_path);
         }
 

@@ -11,9 +11,7 @@
         <!-- Left: Poster & Organizer Info -->
         <div class="lg:col-span-1">
             <div class="sticky top-32">
-                <img src="{{ ($event->poster_path && Storage::disk('public')->exists($event->poster_path))
-                    ? asset('storage/' . $event->poster_path)
-                    : 'https://placehold.co/200x600' }}"
+                <img src="{{ $event->poster_url }}"
             alt="{{ $event->title }}"
             class="w-full rounded-[2.5rem] shadow-2xl border-8 border-white object-cover aspect-[3/4]">
                 
@@ -21,8 +19,8 @@
                     <h4 class="font-bold mb-4 text-slate-700 uppercase tracking-wider text-xs">Penyelenggara Event</h4>
                     @if($event->organizer)
                         <a href="{{ route('organizers.show', $event->organizer->slug) }}" class="flex items-center gap-4 group">
-                            @if($event->organizer->logo_path)
-                                <img src="{{ asset('storage/' . $event->organizer->logo_path) }}" alt="{{ $event->organizer->name }}" class="w-12 h-12 rounded-2xl object-cover border border-slate-200">
+                            @if($event->organizer->logo_url)
+                                <img src="{{ $event->organizer->logo_url }}" alt="{{ $event->organizer->name }}" class="w-12 h-12 rounded-2xl object-cover border border-slate-200">
                             @else
                                 <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold">
                                     {{ strtoupper(substr($event->organizer->name, 0, 2)) }}

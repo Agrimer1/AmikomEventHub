@@ -6,12 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\Organizer;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
+    public function __construct(protected CloudinaryService $cloudinary)
+    {
+        //
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -56,7 +62,7 @@ class EventController extends Controller
         }
 
         if ($request->hasFile('poster')) {
-            $data['poster_path'] = $request->file('poster')->store('posters', 'public');
+            $data['poster_path'] = $this->cloudinary->upload($request->file('poster'), 'posters');
         }
 
         Event::create($data);
@@ -112,15 +118,15 @@ class EventController extends Controller
         }
 
         if ($request->hasFile('poster')) {
-            if ($event->poster_path && Storage::disk('public')->exists($event->poster_path)) {
+            if ($event->poster_path && !str_starts_with($event->poster_path, 'http') && Storage::disk('public')->exists($event->poster_path)) {
                 Storage::disk('public')->delete($event->poster_path);
             }
-            $data['poster_path'] = $request->file('poster')->store('posters', 'public');
+            $data['poster_path'] = $this->cloudinary->upload($request->file('poster'), 'posters');
         }
-    
+
         $event->update($data);
         return redirect()->route('admin.events.index')->with('success', 'Event berhasil diperbarui.');
-    }    
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -133,7 +139,7 @@ class EventController extends Controller
             abort(403, 'Anda tidak memiliki hak untuk menghapus event ini.');
         }
 
-        if ($event->poster_path && Storage::disk('public')->exists($event->poster_path)) {
+        if ($event->poster_path && !str_starts_with($event->poster_path, 'http') && Storage::disk('public')->exists($event->poster_path)) {
             Storage::disk('public')->delete($event->poster_path);
         }
 

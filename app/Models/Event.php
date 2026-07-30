@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -78,16 +79,24 @@ class Event extends Model
         return $this->reviews()->count();
     }
 
-    public function getPosterUrlAttribute()
+    public function getPosterUrlAttribute(): string
     {
         if (!$this->poster_path) {
-            return asset('assets/concert.png');
+            return 'https://placehold.co/600x400';
         }
 
-        if (Str::startsWith($this->poster_path, 'posters/')) {
+        if (Str::startsWith($this->poster_path, 'http://') || Str::startsWith($this->poster_path, 'https://')) {
+            return $this->poster_path;
+        }
+
+        if (Storage::disk('public')->exists($this->poster_path)) {
             return asset('storage/' . $this->poster_path);
         }
 
-        return asset('assets/' . $this->poster_path);
+        if (file_exists(public_path('assets/' . $this->poster_path))) {
+            return asset('assets/' . $this->poster_path);
+        }
+
+        return 'https://placehold.co/600x400';
     }
 }
